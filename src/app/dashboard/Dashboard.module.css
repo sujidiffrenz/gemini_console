@@ -1,0 +1,151 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.card {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    transition: transform var(--transition-normal);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-glow);
+}
+
+.cardIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.cardValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.cardLabel {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.trend {
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trendUp {
+    color: var(--success);
+}
+
+.trendDown {
+    color: var(--error);
+}
+
+.chartsSection {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+.chartCard {
+    min-height: 300px;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+}
+
+.sectionTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-main);
+}
+
+/* Simple CSS Bar Chart Placeholder */
+.barChart {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--spacing-md);
+    height: 200px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--spacing-sm);
+}
+
+.bar {
+    flex: 1;
+    background: var(--primary);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    opacity: 0.7;
+    transition: height 1s ease, opacity 0.3s;
+    position: relative;
+}
+
+.bar:hover {
+    opacity: 1;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.recentActivity {
+    margin-top: var(--spacing-lg);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: var(--spacing-md);
+    color: var(--text-muted);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+}
+
+.table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.statusCompleted {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.statusPending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
