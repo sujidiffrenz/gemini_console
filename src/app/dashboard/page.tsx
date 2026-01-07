@@ -11,7 +11,7 @@ export default function DashboardPage() {
     const { users, loading: usersLoading } = useUsers();
     const { pagination: blogPagination, loading: blogsLoading } = useBlogs(1, 1);
     const { pagination: quotePagination, loading: quotesLoading } = useQuotes(1, 1);
-    const { products, loading: productsLoading } = useProducts();
+    const { data: productsData, loading: productsLoading } = useProducts(1, 1);
     const { data: categoriesData, loading: categoriesLoading } = useCategories(1, 1);
 
     const isLoading = usersLoading || blogsLoading || quotesLoading || productsLoading || categoriesLoading;
@@ -19,8 +19,8 @@ export default function DashboardPage() {
     const stats = [
         { label: 'Total Users', value: users.length.toString(), icon: '👥' },
         { label: 'Total Blogs', value: blogPagination.total.toString(), icon: '📝' },
-        { label: 'Total Quotes', value: quotePagination.total.toString(), icon: '�' },
-        { label: 'Total Products', value: products.length.toString(), icon: '📦' },
+        { label: 'Total Quotes', value: quotePagination.total.toString(), icon: '' },
+        { label: 'Total Products', value: (productsData?.total || 0).toString(), icon: '📦' },
         { label: 'Total Categories', value: categoriesData.total.toString(), icon: '📁' },
     ];
 

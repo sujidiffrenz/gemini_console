@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCategories } from '../../../hooks/useCategories';
+import { categoryService } from '../../../services/category.service';
 import { Category } from '../../../types';
 
 export default function CategoriesPage() {
@@ -24,6 +25,17 @@ export default function CategoriesPage() {
 
     const handleNextPage = () => {
         if (page < totalPages) setPage(p => p + 1);
+    };
+
+    const handleDelete = async (id: string | number) => {
+        if (!window.confirm('Are you sure you want to delete this category?')) return;
+        try {
+            await categoryService.delete(id);
+            refetch();
+        } catch (error) {
+            console.error('Failed to delete category:', error);
+            alert('Failed to delete category');
+        }
     };
 
     if (loading && categories.length === 0) {
@@ -92,30 +104,39 @@ export default function CategoriesPage() {
                                     <td colSpan={5} className="text-center p-8 text-text-muted">No categories found</td>
                                 </tr>
                             ) : (
-                                filteredCategories.map((cat: Category, index: number) => (
-                                    <tr key={cat._id} className="border-b border-white/5 last:border-0">
-                                        <td className="p-md align-middle text-text-main">
-                                            {(page - 1) * pageSize + index + 1}
-                                        </td>
-                                        <td className="p-md align-middle">
-                                            <div className="flex items-center gap-md">
-                                                <span className="text-text-main font-medium">{cat.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-md align-middle text-text-main">
-                                            {cat.parent === 0 ? 'Category' : 'Subcategory'}
-                                        </td>
-                                        <td className="p-md align-middle text-text-main font-mono text-sm">
-                                            {cat.slug}
-                                        </td>
-                                        <td className="p-md align-middle">
-                                            <div className="flex gap-sm">
-                                                <Link href={`/dashboard/categories/${cat._id}`} className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors" title="Edit">✏️</Link>
-                                                <button className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors" title="Delete">🗑️</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                filteredCategories.map((cat: Category, index: number) => {
+                                    const categoryId = cat.id || cat._id;
+                                    return (
+                                        <tr key={categoryId || index} className="border-b border-white/5 last:border-0">
+                                            <td className="p-md align-middle text-text-main">
+                                                {(page - 1) * pageSize + index + 1}
+                                            </td>
+                                            <td className="p-md align-middle">
+                                                <div className="flex items-center gap-md">
+                                                    <span className="text-text-main font-medium">{cat.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-md align-middle text-text-main">
+                                                {cat.parent === 0 ? 'Category' : 'Subcategory'}
+                                            </td>
+                                            <td className="p-md align-middle text-text-main font-mono text-sm">
+                                                {cat.slug}
+                                            </td>
+                                            <td className="p-md align-middle">
+                                                <div className="flex gap-sm">
+                                                    <Link href={`/dashboard/categories/${categoryId}`} className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors" title="Edit">✏️</Link>
+                                                    <button
+                                                        onClick={() => handleDelete(categoryId!)}
+                                                        className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors"
+                                                        title="Delete"
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

@@ -24,7 +24,11 @@ export interface User {
 }
 
 export interface Product {
-    id: number | string;
+    _id: number | string;
+    post_title: string;
+    post_excerpt: string;
+    post_status: string;
+    images: string;
     name: string;
     slug?: string;
     price: string;
@@ -34,12 +38,12 @@ export interface Product {
     category?: string;
     categories?: string[];
     status?: string;
-    images?: { src: string }[];
     icon?: string | React.ReactNode;
 }
 
 export interface Category {
     _id: number | string;
+    id?: number | string;
     name: string;
     description?: string;
     slug?: string;

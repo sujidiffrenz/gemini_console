@@ -309,8 +309,8 @@ export default function BlogEditor({ initialData, isEditing = false, blogId }: B
         if (!Quill || !isQuillReady) {
             return {
                 toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline'],
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
                     ['link', 'image']
                 ]
             };
@@ -471,17 +471,17 @@ export default function BlogEditor({ initialData, isEditing = false, blogId }: B
                         className="p-3 rounded-md border border-border bg-white/5 text-text-main w-full focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                         placeholder="https://example.com/img1.jpg&#10;https://example.com/img2.jpg"
                     />
-                    <div className="mt-2">
+                    {/* <div className="mt-2">
                         <label className="inline-flex items-center justify-center px-4 py-2 border border-border rounded-md cursor-pointer bg-white/5 text-sm hover:bg-white/10 transition-colors">
                             {uploadingContent ? 'Uploading...' : 'Upload Images'}
                             <input type="file" accept="image/*" multiple onChange={handleContentImagesUpload} className="hidden" disabled={uploadingContent} />
                         </label>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Taxonomies */}
-                <h3 className="text-lg font-semibold border-b border-border pb-2 mt-4 text-text-main">Taxonomies</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* <h3 className="text-lg font-semibold border-b border-border pb-2 mt-4 text-text-main">Taxonomies</h3> */}
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
                         <label className="font-medium text-text-muted">Category</label>
                         <select
@@ -499,7 +499,7 @@ export default function BlogEditor({ initialData, isEditing = false, blogId }: B
                         <label className="font-medium text-text-muted">Tags (comma separated)</label>
                         <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} className="p-3 rounded-md border border-border bg-white/5 text-text-main w-full focus:outline-none focus:ring-1 focus:ring-primary transition-all" />
                     </div>
-                </div>
+                </div> */}
 
 
                 {/* Rich Text Editor */}

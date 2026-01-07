@@ -1,10 +1,9 @@
 import { newAxiosInstance } from './apiClient';
-import { Product, ServiceResponse } from '../types';
+import { Product, ServiceResponse, PaginatedResult } from '../types';
 
 export const productService = {
-    async getAll(params: Record<string, any> = {}): Promise<Product[]> {
-        const query = new URLSearchParams(params).toString();
-        const url = `/api/products?${query}`;
+    async getAll(page: number, page_size: number): Promise<PaginatedResult<Product>> {
+        const url = `/api/products?page=${page}&page_size=${page_size}`;
         console.log(`Fetching products from: ${url}`);
         try {
             const response = await newAxiosInstance.get<any>(url);
@@ -14,32 +13,57 @@ export const productService = {
             // Standardize result extraction
             const result = data?.result !== undefined ? data.result : data;
 
-            // 1. Handle Direct Array
-            if (Array.isArray(result)) {
-                return result;
+            // 1. Handle Paginated Object Structure { items: [], total: 0, ... }
+            if (result && typeof result === 'object' && !Array.isArray(result)) {
+
+                const items = Array.isArray(result.items) ? result.items : [];
+                // If items is not array, maybe it's under a different key or the structure is different
+                // fallback to simple check
+
+                const total = typeof result.total === 'number' ? result.total : items.length;
+
+                return {
+                    items,
+                    total: total,
+                    page: result.page || page,
+                    size: result.size || result.page_size || page_size,
+                    pages: result.pages || result.total_pages || Math.ceil(total / page_size)
+                };
             }
 
-            // 2. Handle Paginated Object Structure (if products ever becomes paginated)
-            if (result && typeof result === 'object' && Array.isArray(result.items)) {
-                return result.items;
+            // 2. Handle Direct Array (Legacy or simple list)
+            if (Array.isArray(result)) {
+                return {
+                    items: result,
+                    total: result.length,
+                    page: 1,
+                    size: result.length,
+                    pages: 1
+                };
             }
 
             // 3. Fallback for empty/unexpected (like {})
             if (result && typeof result === 'object' && Object.keys(result).length === 0) {
-                console.warn('Products API returned an empty object, returning empty list');
+                console.warn('Products API returned an empty object, returning empty results');
             } else if (result !== null && result !== undefined) {
                 console.error('Unexpected products API response format:', result);
             }
+
         } catch (error) {
             console.error('Error fetching products:', error);
         }
 
-        return [];
+        return { items: [], total: 0, page: page, size: page_size, pages: 0 };
     },
 
     async getById(id: string): Promise<Product> {
         // OpenAPI: /api/products/{product_id}
         const response = await newAxiosInstance.get<ServiceResponse<Product>>(`/api/products/${id}`);
         return response.data.result;
+    },
+
+    async delete(id: string | number): Promise<ServiceResponse<any>> {
+        const response = await newAxiosInstance.delete<ServiceResponse<any>>(`/api/products/${id}`);
+        return response.data;
     }
 };

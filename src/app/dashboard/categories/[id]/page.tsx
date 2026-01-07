@@ -6,7 +6,10 @@ import CategoryEditor from '../../../../components/categories/CategoryEditor';
 
 export default function EditCategoryPage() {
     const params = useParams();
-    const categoryId = params?._id ? Number(params._id) : null;
+    // Start with the raw param 'id' which corresponds to the folder [id]
+    // Decode it just in case, though usually auto-decoded
+    const rawId = params?.id;
+    const categoryId = rawId ? (Array.isArray(rawId) ? rawId[0] : rawId) : null;
 
     if (!categoryId) {
         return <div className="text-center p-8">Invalid Category ID</div>;

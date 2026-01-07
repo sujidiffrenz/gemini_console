@@ -85,31 +85,38 @@ export const categoryService = {
         const formData = new FormData();
         formData.append('file', file);
 
-        const fetchUrl = `/api/upload/?folder=categories`;
-        console.log("🚀 V3 Category Raw Fetch Upload Attempt:", fetchUrl);
+        // Try direct backend access to bypass potential Next.js proxy body limits/issues
+        const baseUrl = configKeys.GEMINI_NEW_BASE_URL.replace(/\/$/, '');
+        const url = `${baseUrl}/api/upload?folder=categories`;
 
-        const fetchResponse = await fetch(fetchUrl, {
-            method: 'POST',
-            body: formData,
-            // DO NOT set Content-Type header, fetch will set it correctly with boundary
-        });
+        console.log("🚀 V3 Category Direct Axios Upload Attempt:", url);
 
-        if (!fetchResponse.ok) {
-            const errorText = await fetchResponse.text();
-            throw new Error(`Upload failed (${fetchResponse.status}): ${errorText}`);
+        try {
+            const response = await newAxiosInstance.post<ServiceResponse<any>>(url, formData);
+
+            const responseData = response.data;
+            console.log("✅ V3 Category Upload Response:", responseData);
+
+            // Handle both { result: { url: "..." } } and { result: "/path/to/file" }
+            let relativeUrl = responseData.result?.url;
+            if (!relativeUrl && typeof responseData.result === 'string') {
+                relativeUrl = responseData.result;
+            }
+
+            if (relativeUrl) {
+                const baseUrl = configKeys.GEMINI_NEW_BASE_URL.replace(/\/$/, '');
+                const cleanRelative = relativeUrl.startsWith('/') ? relativeUrl : `/${relativeUrl}`;
+                // If it's already a full URL, don't prepend
+                if (cleanRelative.startsWith('http')) {
+                    return cleanRelative;
+                }
+                return `${baseUrl}${cleanRelative}`;
+            }
+
+            return '';
+        } catch (error) {
+            console.error("❌ Upload failed:", error);
+            throw error;
         }
-
-        const responseData = await fetchResponse.json();
-        const relativeUrl = responseData.result?.url;
-
-        console.log("✅ V3 Category Upload Response:", responseData);
-
-        if (relativeUrl) {
-            const baseUrl = configKeys.GEMINI_NEW_BASE_URL.replace(/\/$/, '');
-            const cleanRelative = relativeUrl.startsWith('/') ? relativeUrl : `/${relativeUrl}`;
-            return `${baseUrl}${cleanRelative}`;
-        }
-
-        return (responseData.result as string) || '';
     }
 };

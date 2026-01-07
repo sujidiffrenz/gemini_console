@@ -79,9 +79,9 @@ export default function CategoryEditor({ initialData, isEditing = false, categor
             // Use our new uploadFile method
             const url = await categoryService.uploadFile(file);
             setThumbnail(url);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to upload thumbnail', error);
-            alert('Failed to upload thumbnail');
+            alert(`Failed to upload thumbnail: ${error.response?.data?.message || error.message || 'Unknown error'}`);
         } finally {
             setUploading(false);
         }
@@ -164,7 +164,7 @@ export default function CategoryEditor({ initialData, isEditing = false, categor
                         className="p-3 rounded-md border border-border bg-white/5 text-text-main w-full focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                     >
                         <option value={0} className="bg-surface">None (Top Level)</option>
-                        {categories.filter(c => c._id != categoryId).map((cat) => (
+                        {categories.filter(c => String(c._id) !== String(categoryId) && String(c.id) !== String(categoryId)).map((cat) => (
                             <option key={cat.term_id} value={cat.term_id} className="bg-surface">
                                 {cat.name}
                             </option>
@@ -180,7 +180,7 @@ export default function CategoryEditor({ initialData, isEditing = false, categor
                         className="p-3 rounded-md border border-border bg-white/5 text-text-main w-full focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                     >
                         <option value="active" className="bg-surface">Active</option>
-                        <option value="archived" className="bg-surface">Archived</option>
+                        <option value="deleted" className="bg-surface">Deleted</option>
                     </select>
                 </div>
 
