@@ -6,8 +6,8 @@ import QueryProvider from "../providers/QueryProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Gemini Admin Panel",
-  description: "Premium Admin Dashboard for Gemini",
+  title: "Gemini Console",
+  description: "Premium management console for Gemini",
 };
 
 export default function RootLayout({

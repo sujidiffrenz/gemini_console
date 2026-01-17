@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useProducts } from '../../../hooks/useProducts';
 import { Product } from '../../../types';
 import { productService } from '../../../services/product.service';
@@ -15,8 +16,8 @@ export default function ProductsPage() {
     const totalPages = data?.pages || 0;
 
     const filteredProducts = products.filter(product =>
-        (product.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.category || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (product.post_title || product.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (Array.isArray(product.category) ? product.category.join(' ') : (product.category || '')).toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handlePrevPage = () => {
@@ -85,99 +86,234 @@ export default function ProductsPage() {
     }
 
     return (
-        <div className="flex flex-col gap-lg">
-            <div className="flex justify-between items-center mb-md">
-                <h1 className="text-[1.5rem] font-bold text-text-main">Products</h1>
-                <button className="bg-primary text-white border-none py-sm px-lg rounded-md cursor-pointer font-medium flex items-center gap-xs transition-colors duration-200 hover:bg-primary-hover">
-                    <span>+</span> Add Product
-                </button>
+        <div className="flex flex-col gap-6 sm:gap-lg">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 className="text-2xl font-bold text-text-main">Products</h1>
+                <Link href="/dashboard/products/new" className="w-full sm:w-auto">
+                    <button className="w-full bg-primary text-white border-none py-3 px-6 rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:bg-primary-hover active:scale-95 shadow-lg shadow-primary/20">
+                        <span className="text-xl leading-none">+</span> Add Product
+                    </button>
+                </Link>
             </div>
 
-            <div className="glass-panel overflow-x-auto w-full">
-                <div className="p-lg pb-0 mb-lg flex gap-md">
-                    <input
-                        type="text"
-                        placeholder="Search products..."
-                        className="flex-1 p-sm rounded-md border border-border bg-white/5 text-text-main"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr>
-                            <th className="text-left p-md text-text-muted font-medium border-b border-border">Product</th>
-                            <th className="text-left p-md text-text-muted font-medium border-b border-border">Description</th>
-                            <th className="text-left p-md text-text-muted font-medium border-b border-border">Stock</th>
-                            <th className="text-left p-md text-text-muted font-medium border-b border-border">Post Status</th>
-                            <th className="text-left p-md text-text-muted font-medium border-b border-border">Slug</th>
-                            <th className="text-left p-md text-text-muted font-medium border-b border-border">Category</th>
-                            <th className="text-left p-md text-text-muted font-medium border-b border-border">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div className="glass-panel border border-border overflow-hidden rounded-xl">
+                {/* <div className="p-4 sm:p-lg border-b border-white/5 bg-white/5">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search products..."
+                            className="w-full p-3 pl-10 rounded-lg border border-border bg-black/20 text-text-main focus:border-primary focus:outline-none transition-all"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">🔍</span>
+                    </div>
+                </div> */}
+
+                {/* Mobile / small screens: cards */}
+                <div className="block md:hidden">
+                    <div className="divide-y divide-white/5">
                         {filteredProducts.length === 0 ? (
-                            <tr><td colSpan={6} className="text-center p-8 text-text-main">No products found</td></tr>
+                            <div className="text-center p-8 text-text-main">No products found</div>
                         ) : (
-                            filteredProducts.map((product) => (
-                                <tr key={product._id}>
-                                    <td className="p-md border-b border-white/5 text-text-main align-middle">
-                                        <div className="flex items-center gap-md">
-                                            <div className="w-12 h-12 rounded-md bg-white/5 flex items-center justify-center text-[1.5rem]">{product.icon}</div>
-                                            <span>{product.post_title}</span>
-                                        </div>
-                                    </td>
+                            filteredProducts.map((product, index) => {
+                                const id = product._id || product.id;
+                                const title = product.post_title || product.name || 'Untitled';
+                                const slug = product.post_name || product.slug || '-';
+                                const category = Array.isArray(product.category) ? product.category.join(', ') : (product.category || '-');
+                                const rowNumber = (page - 1) * pageSize + index + 1;
 
-                                    <td className="p-md border-b border-white/5 text-text-main align-middle">{product.post_excerpt}</td>
-                                    <td className="p-md border-b border-white/5 text-text-main align-middle">
-                                        <span className={getStockStyle(product.stock_status)}>
-                                            {getStockLabel(product.stock_status || '')}
-                                        </span>
-                                    </td>
+                                return (
+                                    <div key={String(id || product.slug || index)} className="p-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="shrink-0 w-8 text-text-muted font-mono text-sm pt-1">
+                                                #{rowNumber}
+                                            </div>
+                                            <div className="shrink-0 w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center text-[1.25rem]">
+                                                {product.icon || '📦'}
+                                            </div>
 
-                                    <td className="p-md border-b border-white/5 text-text-main align-middle">
-                                        <span className={`px-2 py-1 rounded-full text-[0.75rem] font-semibold inline-block ${product.status === 'Published' ? 'bg-success/10 text-success' : 'bg-slate-500/10 text-text-muted'
-                                            }`}>
-                                            {product.post_status}
-                                        </span>
-                                    </td>
-                                    <td className="p-md border-b border-white/5 text-text-main align-middle">{product.slug}</td>
-                                    <td className="p-md border-b border-white/5 text-text-main align-middle">{product.category}</td>
-                                    <td className="p-md border-b border-white/5 text-text-main align-middle">
-                                        <div className="flex gap-sm">
-                                            <button className="bg-transparent border-none text-text-muted cursor-pointer p-1 rounded-sm transition-all duration-200 hover:text-text-main hover:bg-white/10" title="Edit">✏️</button>
-                                            <button
-                                                className="bg-transparent border-none text-text-muted cursor-pointer p-1 rounded-sm transition-all duration-200 hover:text-text-main hover:bg-white/10"
-                                                title="Delete"
-                                                onClick={() => handleDelete(product._id)}
-                                            >
-                                                🗑️
-                                            </button>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="min-w-0">
+                                                        <div className="text-text-main font-semibold truncate">{title}</div>
+                                                        <div className="text-xs text-text-muted mt-1 break-all">Slug: {slug}</div>
+                                                    </div>
+
+                                                    <div className="flex gap-2 shrink-0">
+                                                        {id && (
+                                                            <>
+                                                                <Link href={`/dashboard/products/${id}`}>
+                                                                    <button className="bg-transparent border-none text-text-muted cursor-pointer p-2 rounded-md transition-all duration-200 hover:text-text-main hover:bg-white/10" title="View">
+                                                                        👁️
+                                                                    </button>
+                                                                </Link>
+                                                                <Link href={`/dashboard/products/${id}/edit`}>
+                                                                    <button className="bg-transparent border-none text-text-muted cursor-pointer p-2 rounded-md transition-all duration-200 hover:text-text-main hover:bg-white/10" title="Edit">
+                                                                        ✏️
+                                                                    </button>
+                                                                </Link>
+                                                                <button
+                                                                    className="bg-transparent border-none text-text-muted cursor-pointer p-2 rounded-md transition-all duration-200 hover:text-text-main hover:bg-white/10"
+                                                                    title="Delete"
+                                                                    onClick={() => handleDelete(id)}
+                                                                >
+                                                                    🗑️
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-3 flex flex-wrap items-center gap-2">
+                                                    <span className={`text-xs font-semibold ${getStockStyle(product.stock_status)}`}>
+                                                        {getStockLabel(product.stock_status || '')}
+                                                    </span>
+                                                    <span className={`px-2 py-1 rounded-full text-[0.75rem] font-semibold inline-block ${product.status === 'Published'
+                                                        ? 'bg-success/10 text-success'
+                                                        : 'bg-slate-500/10 text-text-muted'
+                                                        }`}>
+                                                        {product.post_status}
+                                                    </span>
+                                                </div>
+
+                                                <div className="mt-3 text-sm text-text-main/80 line-clamp-2">
+                                                    {product.post_excerpt || ''}
+                                                </div>
+
+                                                <div className="mt-2 text-xs text-text-muted">
+                                                    Category: {category}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                            ))
+                                    </div>
+                                );
+                            })
                         )}
-                    </tbody>
-                </table>
-                <div className="flex items-center justify-end p-lg border-t border-border gap-md">
-                    <button
-                        onClick={handlePrevPage}
-                        disabled={page === 1}
-                        className="bg-transparent border border-border text-text-main px-4 py-2 rounded-md hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                        Previous
-                    </button>
-                    <span className="text-text-muted text-sm">
-                        Page {page} of {totalPages || 1}
-                    </span>
-                    <button
-                        onClick={handleNextPage}
-                        disabled={page >= totalPages}
-                        className="bg-transparent border border-border text-text-main px-4 py-2 rounded-md hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                    >
-                        Next
-                    </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border-t border-border gap-3">
+                        <button
+                            onClick={handlePrevPage}
+                            disabled={page === 1}
+                            className="bg-transparent border border-border text-text-main px-4 py-2 rounded-md hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-text-muted text-sm">
+                            Page {page} of {totalPages || 1}
+                        </span>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={page >= totalPages}
+                            className="bg-transparent border border-border text-text-main px-4 py-2 rounded-md hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+
+                {/* Desktop / medium+ screens: table */}
+                <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th className="text-center px-2 py-3 text-sm text-text-muted font-medium border-b border-border w-10">#</th>
+                                <th className="text-left pl-2 pr-4 py-3 text-sm text-text-muted font-medium border-b border-border w-[300px]">Product</th>
+                                <th className="text-left px-4 py-3 text-sm text-text-muted font-medium border-b border-border min-w-[200px]">Description</th>
+                                <th className="text-left px-4 py-3 text-sm text-text-muted font-medium border-b border-border whitespace-nowrap">Stock</th>
+                                <th className="text-left px-4 py-3 text-sm text-text-muted font-medium border-b border-border whitespace-nowrap">Status</th>
+                                <th className="text-left px-4 py-3 text-sm text-text-muted font-medium border-b border-border">Slug</th>
+                                <th className="text-left px-4 py-3 text-sm text-text-muted font-medium border-b border-border">Category</th>
+                                <th className="text-left px-4 py-3 text-sm text-text-muted font-medium border-b border-border text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredProducts.length === 0 ? (
+                                <tr><td colSpan={8} className="text-center p-8 text-text-main">No products found</td></tr>
+                            ) : (
+                                filteredProducts.map((product, index) => (
+                                    <tr key={String(product._id || product.id || product.slug || index)} className="group hover:bg-white/5 transition-colors">
+                                        <td className="px-2 py-3 border-b border-white/5 text-text-muted align-top font-mono text-sm text-center">
+                                            {(page - 1) * pageSize + index + 1}
+                                        </td>
+                                        <td className="pl-2 pr-4 py-3 border-b border-white/5 text-text-main align-top">
+                                            <div className="flex items-start gap-3">
+
+                                                <div className="min-w-0">
+                                                    <div className="font-medium truncate max-w-[200px]" title={product.post_title}>{product.post_title}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td className="px-4 py-3 border-b border-white/5 text-text-main align-top">
+                                            <div className="line-clamp-2 text-sm text-text-main/80 max-w-[300px]" title={product.post_excerpt}>
+                                                {product.post_excerpt}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 border-b border-white/5 text-text-main align-top whitespace-nowrap">
+                                            <span className={getStockStyle(product.stock_status)}>
+                                                {getStockLabel(product.stock_status || '')}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-4 py-3 border-b border-white/5 text-text-main align-top whitespace-nowrap">
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold inline-block ${product.status === 'Published' ? 'bg-success/10 text-success' : 'bg-slate-500/10 text-text-muted'
+                                                }`}>
+                                                {product.post_status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 border-b border-white/5 text-text-main align-top text-sm font-mono text-text-muted max-w-[150px] truncate">
+                                            {product.slug}
+                                        </td>
+                                        <td className="px-4 py-3 border-b border-white/5 text-text-main align-top text-sm">
+                                            {product.category}
+                                        </td>
+                                        <td className="px-4 py-3 border-b border-white/5 text-text-main align-top text-right">
+                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Link href={`/dashboard/products/${product._id || product.id}`}>
+                                                    <button className="bg-transparent border-none text-text-muted cursor-pointer p-1.5 rounded hover:text-primary hover:bg-primary/10 transition-colors" title="View">
+                                                        👁️
+                                                    </button>
+                                                </Link>
+                                                <Link href={`/dashboard/products/${product._id || product.id}/edit`}>
+                                                    <button className="bg-transparent border-none text-text-muted cursor-pointer p-1.5 rounded hover:text-primary hover:bg-primary/10 transition-colors" title="Edit">
+                                                        ✏️
+                                                    </button>
+                                                </Link>
+                                                <button
+                                                    className="bg-transparent border-none text-text-muted cursor-pointer p-1.5 rounded hover:text-error hover:bg-error/10 transition-colors"
+                                                    title="Delete"
+                                                    onClick={() => product.id && handleDelete(product.id)}
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                    <div className="flex items-center justify-end p-lg border-t border-border gap-md">
+                        <button
+                            onClick={handlePrevPage}
+                            disabled={page === 1}
+                            className="bg-transparent border border-border text-text-main px-4 py-2 rounded-md hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-text-muted text-sm">
+                            Page {page} of {totalPages || 1}
+                        </span>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={page >= totalPages}
+                            className="bg-transparent border border-border text-text-main px-4 py-2 rounded-md hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

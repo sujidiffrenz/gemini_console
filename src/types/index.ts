@@ -14,31 +14,73 @@ export interface PaginatedResult<T> {
 }
 
 export interface User {
-    id: number | string;
+    id?: number | string;
+    _id?: string;
     user_name: string;
     email?: string;
     role: 'admin' | 'user' | string;
     status?: string;
     initials?: string;
     isActive?: boolean;
+    password?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface Product {
-    _id: number | string;
+    _id?: number | string;
+    id?: number | string;
     post_title: string;
+    post_name: string;
+    post_content: string;
     post_excerpt: string;
     post_status: string;
-    images: string;
-    name: string;
-    slug?: string;
-    price: string;
+    post_date?: string;
+    post_author?: number;
+    menu_order?: number;
+    comment_status?: string;
+
+    // Inventory & Shipping
+    stock_status?: string;
+    manage_stock?: string; // 'yes' | 'no'
+    backorders?: string;
+    sold_individually?: string;
+
+    // Digital
+    downloadable?: string;
+    virtual?: string;
+    download_limit?: string | number;
+    download_expiry?: string | number;
+
+    // Prices & Tax
+    price?: string;
     regular_price?: string;
     sale_price?: string;
-    stock_status?: string;
-    category?: string;
-    categories?: string[];
-    status?: string;
+    tax_status?: string;
+    tax_class?: string;
+
+    // Images & Display
+    images?: string | string[] | { src: string }[];
     icon?: string | React.ReactNode;
+
+    // Meta & Attributes
+    meta?: Record<string, any>;
+    attributes?: Record<string, any>;
+
+    // Categories
+    category?: string[] | string;
+    category_value?: string;
+    categories?: string[];
+
+    // Legacy/Computed?
+    name?: string;
+    slug?: string;
+    status?: string;
+}
+
+export interface ContentSection {
+    title: string;
+    description: string;
 }
 
 export interface Category {
@@ -56,6 +98,9 @@ export interface Category {
     term_id?: number;
     tax_status?: string;
     tax_class?: string;
+    category_content_title?: string;
+    category_content_description?: string;
+    sub_content_category?: ContentSection[];
 }
 
 
@@ -118,4 +163,16 @@ export interface Quote {
 export interface LoginResponse {
     access_token: string;
     token_type: string;
+}
+
+export interface Contact {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    company_name: string;
+    company_address: string;
+    message: string;
+    created_at: string;
+    updated_at: string;
 }

@@ -3,10 +3,27 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useBlogs } from '../../../hooks/useBlogs';
+import { blogService } from '../../../services/blog.service';
 
 export default function BlogsPage() {
     const [page, setPage] = useState(1);
     const { blogs, loading, error, pagination, refetch } = useBlogs(page);
+    const [deletingId, setDeletingId] = useState<string | number | null>(null);
+
+    const handleDelete = async (id: string | number) => {
+        if (!window.confirm('Are you sure you want to delete this blog?')) return;
+
+        setDeletingId(id);
+        try {
+            await blogService.delete(id);
+            refetch();
+        } catch (error) {
+            console.error('Failed to delete blog', error);
+            alert('Failed to delete blog');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     if (loading && blogs.length === 0) {
         return <div className="flex flex-col gap-lg text-center p-8">Loading blogs...</div>;
@@ -106,7 +123,14 @@ export default function BlogsPage() {
                                                     <Link href={`/dashboard/blogs/${blogId}`} className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors" title="Edit">
                                                         ✏️
                                                     </Link>
-                                                    <button className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors" title="Delete">🗑️</button>
+                                                    <button
+                                                        onClick={() => blogId && handleDelete(blogId)}
+                                                        disabled={deletingId === blogId}
+                                                        className="text-text-muted p-1 rounded hover:text-error hover:bg-error/10 transition-colors disabled:opacity-50"
+                                                        title="Delete"
+                                                    >
+                                                        {deletingId === blogId ? '...' : '🗑️'}
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -150,8 +174,8 @@ export default function BlogsPage() {
                                         key={pageNum}
                                         onClick={() => setPage(pageNum)}
                                         className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${page === pageNum
-                                                ? 'bg-primary text-white font-bold'
-                                                : 'bg-white/5 text-text-muted hover:text-text-main hover:bg-white/10'
+                                            ? 'bg-primary text-white font-bold'
+                                            : 'bg-white/5 text-text-muted hover:text-text-main hover:bg-white/10'
                                             }`}
                                     >
                                         {pageNum}

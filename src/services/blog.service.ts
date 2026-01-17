@@ -57,18 +57,14 @@ export const blogService = {
     },
 
     async getById(id: string | number): Promise<Blog | null> {
-        // OpenAPI: /api/blogs/{slug} - typically for public view
-        // The dashboard might need to fetch by ID or Slug. 
-        // If passing ID, the API might not find it if it strictly expects slug.
-        // However, standard practices often allow ID or Slug. 
-        // If strict, we assume the 'id' param here is actually a slug or the API handles it.
-        const response = await newAxiosInstance.get<ServiceResponse<any>>(`/api/blogs/${id}`);
+        // Standard ID-based route
+        const response = await newAxiosInstance.get<ServiceResponse<any>>(`/api/blogs/id/${id}`);
         return response.data.result;
     },
 
     async create(data: Partial<Blog>): Promise<Blog> {
         // OpenAPI: POST /api/blogs/
-        const response = await newAxiosInstance.post<ServiceResponse<any>>(`/api/blogs/`, data);
+        const response = await newAxiosInstance.post<ServiceResponse<any>>(`/api/blogs`, data);
         return response.data.result;
     },
 
@@ -100,7 +96,7 @@ export const blogService = {
         }
 
         // Bypass Axios/apiClient and use raw fetch to determine if extra headers are the issue
-        const fetchUrl = `/api/upload/?folder=general`;
+        const fetchUrl = `/api/upload/?folder=blog`;
         console.log("🚀 Raw Fetch Upload Attempt:", fetchUrl);
 
         const fetchResponse = await fetch(fetchUrl, {

@@ -52,6 +52,7 @@ const createNewAxiosInstance = (baseURL: string) => {
 
     const instance = axios.create({
         baseURL: actualBaseURL,
+        timeout: 10000, // 10 seconds timeout
     });
 
     // 🔹 Request Interceptor: Attach headers, modify config if needed

@@ -23,10 +23,10 @@ export default function LoginPage() {
 
             <div className="glass-panel w-full max-w-[400px] p-xl rounded-lg relative z-10">
                 <h1 className="text-[1.75rem] font-bold text-center mb-sm bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                    Gemini Admin
+                    Gemini Console
                 </h1>
                 <p className="text-center text-text-muted text-sm mb-xl">
-                    Enter your credentials to access the panel
+                    Enter your credentials to access the console
                 </p>
 
                 {error && (
@@ -44,7 +44,7 @@ export default function LoginPage() {
                             type="text"
                             id="username"
                             className="w-full px-4 py-3 bg-black/20 border border-border rounded-md text-text-main transition-all duration-150 focus:border-primary focus:bg-black/30 focus:ring-2 focus:ring-primary/20"
-                            placeholder="admin"
+                            placeholder="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required

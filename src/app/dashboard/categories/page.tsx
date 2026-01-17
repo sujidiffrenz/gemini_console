@@ -78,24 +78,26 @@ export default function CategoriesPage() {
     }
 
     return (
-        <div className="flex flex-col gap-lg">
-            <div className="flex justify-between items-center mb-md">
+        <div className="flex flex-col gap-6 sm:gap-lg">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-2xl font-bold text-text-main">Categories</h1>
-                <Link href="/dashboard/categories/new" className="bg-primary text-white px-lg py-sm rounded-md font-medium flex items-center gap-xs hover:bg-primary-hover transition-colors">
-                    <span className="text-xl">+</span> Add Category
+                <Link href="/dashboard/categories/new" className="w-full sm:w-auto">
+                    <button className="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary-hover transition-all active:scale-95 shadow-lg shadow-primary/20">
+                        <span className="text-xl leading-none">+</span> Add Category
+                    </button>
                 </Link>
             </div>
 
-            <div className="glass-panel overflow-hidden border border-border">
+            <div className="glass-panel border border-border overflow-hidden rounded-xl">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                         <thead>
-                            <tr className="border-b border-border">
-                                <th className="text-left p-md text-text-muted font-medium">#</th>
-                                <th className="text-left p-md text-text-muted font-medium">Category</th>
-                                <th className="text-left p-md text-text-muted font-medium">Category Type</th>
-                                <th className="text-left p-md text-text-muted font-medium">Slug</th>
-                                <th className="text-left p-md text-text-muted font-medium">Actions</th>
+                            <tr className="border-b border-border bg-white/5">
+                                <th className="text-center w-10 px-2 py-3 text-text-muted font-medium text-sm uppercase tracking-wider">#</th>
+                                <th className="text-left px-4 py-3 text-text-muted font-medium text-sm uppercase tracking-wider">Category</th>
+                                <th className="text-left px-4 py-3 text-text-muted font-medium text-sm uppercase tracking-wider">Type</th>
+                                <th className="text-left px-4 py-3 text-text-muted font-medium text-sm uppercase tracking-wider">Slug</th>
+                                <th className="text-right px-4 py-3 text-text-muted font-medium text-sm uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -107,30 +109,45 @@ export default function CategoriesPage() {
                                 filteredCategories.map((cat: Category, index: number) => {
                                     const categoryId = cat.id || cat._id;
                                     return (
-                                        <tr key={categoryId || index} className="border-b border-white/5 last:border-0">
-                                            <td className="p-md align-middle text-text-main">
+                                        <tr key={categoryId || index} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group">
+                                            <td className="w-10 px-2 py-3 text-center align-middle text-text-muted text-sm border-r border-white/5">
                                                 {(page - 1) * pageSize + index + 1}
                                             </td>
-                                            <td className="p-md align-middle">
-                                                <div className="flex items-center gap-md">
-                                                    <span className="text-text-main font-medium">{cat.name}</span>
-                                                </div>
+                                            <td className="px-4 py-3 align-middle">
+                                                <Link href={`/dashboard/categories/${categoryId}`} className="flex items-center gap-3 group/link">
+                                                    <span className="text-text-main font-semibold group-hover/link:text-primary transition-colors">{cat.name}</span>
+                                                </Link>
                                             </td>
-                                            <td className="p-md align-middle text-text-main">
-                                                {cat.parent === 0 ? 'Category' : 'Subcategory'}
+                                            <td className="px-4 py-3 align-middle">
+                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${cat.parent === 0 ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'}`}>
+                                                    {cat.parent === 0 ? 'Category' : 'Sub'}
+                                                </span>
                                             </td>
-                                            <td className="p-md align-middle text-text-main font-mono text-sm">
+                                            <td className="px-4 py-3 align-middle text-text-muted font-mono text-xs">
                                                 {cat.slug}
                                             </td>
-                                            <td className="p-md align-middle">
-                                                <div className="flex gap-sm">
-                                                    <Link href={`/dashboard/categories/${categoryId}`} className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors" title="Edit">✏️</Link>
+                                            <td className="px-4 py-3 align-middle text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link
+                                                        href={`/dashboard/categories/${categoryId}`}
+                                                        className="p-2 rounded-lg bg-white/5 text-text-muted hover:text-white hover:bg-primary transition-all shadow-sm"
+                                                        title="View Details"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z" /><circle cx="12" cy="12" r="3" /></svg>
+                                                    </Link>
+                                                    <Link
+                                                        href={`/dashboard/categories/${categoryId}/edit`}
+                                                        className="p-2 rounded-lg bg-white/5 text-text-muted hover:text-white hover:bg-secondary transition-all shadow-sm"
+                                                        title="Edit"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+                                                    </Link>
                                                     <button
                                                         onClick={() => handleDelete(categoryId!)}
-                                                        className="text-text-muted p-1 rounded hover:text-text-main hover:bg-white/10 transition-colors"
+                                                        className="p-2 rounded-lg bg-white/5 text-text-muted hover:text-white hover:bg-error transition-all shadow-sm"
                                                         title="Delete"
                                                     >
-                                                        🗑️
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
                                                     </button>
                                                 </div>
                                             </td>
@@ -161,6 +178,6 @@ export default function CategoriesPage() {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

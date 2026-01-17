@@ -1,43 +1,99 @@
 import { newAxiosInstance } from './apiClient';
-import { User, ServiceResponse } from '../types';
+import { User, ServiceResponse, PaginatedResult } from '../types';
 
 export const userService = {
-    async getAll(): Promise<User[]> {
-        const url = `/api/users/`;
-        console.log(`Fetching users from: ${url}`);
+    async getAll(page = 1, limit = 10): Promise<PaginatedResult<User>> {
+        const url = `/api/users/?page=${page}&limit=${limit}`;
+        console.log(`📡 Fetching users from: ${url}`);
         try {
             const response = await newAxiosInstance.get<any>(url);
             const data = response.data;
             console.log('Users API response:', data);
 
-            // Standardize result extraction
+            // Handle new structure: result.data and result.pagination
+            if (data?.result && typeof data.result === 'object') {
+                const res = data.result;
+                const items = Array.isArray(res.data) ? res.data : [];
+                const pag = res.pagination || {};
+
+                return {
+                    items,
+                    total: typeof pag.total === 'number' ? pag.total : items.length,
+                    page: typeof pag.page === 'number' ? pag.page : page,
+                    size: typeof pag.limit === 'number' ? pag.limit : limit,
+                    pages: typeof pag.pages === 'number' ? pag.pages : 1
+                };
+            }
+
+            // Fallback for direct result extraction (backwards compatibility)
             const result = data?.result !== undefined ? data.result : data;
 
-            // 1. Handle Direct Array
+            // 1. Handle Paginated Object Structure
+            if (result && typeof result === 'object' && !Array.isArray(result)) {
+                const items = Array.isArray(result.items) ? result.items :
+                    Array.isArray(result.data) ? result.data : [];
+                const total = typeof result.total === 'number' ? result.total : items.length;
+
+                return {
+                    items,
+                    total: total,
+                    page: result.page || page,
+                    size: result.size || result.page_size || result.limit || limit,
+                    pages: result.pages || result.total_pages || Math.ceil(total / limit)
+                };
+            }
+
+            // 2. Handle Direct Array
             if (Array.isArray(result)) {
-                return result;
+                return {
+                    items: result,
+                    total: result.length,
+                    page: 1,
+                    size: result.length,
+                    pages: 1
+                };
             }
 
-            // 2. Handle Paginated Object Structure (if users ever becomes paginated)
-            if (result && typeof result === 'object' && Array.isArray(result.items)) {
-                return result.items;
+            // If we get here, the response format is unexpected
+            console.warn('⚠️ Unexpected users API response format, returning empty result');
+            return { items: [], total: 0, page, size: limit, pages: 0 };
+        } catch (err: any) {
+            console.error('❌ Error in userService.getAll:', {
+                message: err.message,
+                url: err.config?.url,
+                baseURL: err.config?.baseURL,
+                response: err.response?.data,
+                status: err.response?.status
+            });
+
+            // Provide more helpful error message
+            if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+                throw new Error('Network Error: Unable to connect to the users API. Please check if the backend server is running.');
             }
 
-            // 3. Fallback for empty/unexpected (like {})
-            if (result && typeof result === 'object' && Object.keys(result).length === 0) {
-                console.warn('Users API returned an empty object, returning empty list');
-            } else if (result !== null && result !== undefined) {
-                console.error('Unexpected users API response format:', result);
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error);
+            // Re-throw the error so it can be handled by the calling code
+            throw err;
         }
-
-        return [];
     },
 
     async getById(id: string): Promise<User> {
-        const response = await newAxiosInstance.get<ServiceResponse<User>>(`/api/users/${id}`);
+        const response = await newAxiosInstance.get<ServiceResponse<User>>(`/api/users/${id}/`);
         return response.data.result;
+    },
+
+    async create(data: Partial<User>): Promise<ServiceResponse<User>> {
+        const response = await newAxiosInstance.post<ServiceResponse<User>>('/api/users/', data);
+        return response.data;
+    },
+
+    async update(id: string | number, data: Partial<User>): Promise<ServiceResponse<User>> {
+        // Use PATCH for partial updates, and add trailing slash for consistency
+        const response = await newAxiosInstance.put<ServiceResponse<User>>(`/api/users/${id}`, data);
+        return response.data;
+    },
+
+    async delete(id: string | number): Promise<ServiceResponse<any>> {
+        const response = await newAxiosInstance.delete<ServiceResponse<any>>(`/api/users/${id}/`);
+        return response.data;
     }
 };

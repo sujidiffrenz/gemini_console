@@ -6,7 +6,7 @@ import BlogEditor from '../../../../components/blogs/BlogEditor';
 
 export default function EditBlogPage() {
     const params = useParams();
-    const blogId = params?.id ? Number(params.id) : null;
+    const blogId = params?.id ? String(params.id) : null;
 
     if (!blogId) {
         return <div className="text-center p-8">Invalid Blog ID</div>;

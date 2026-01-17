@@ -87,7 +87,7 @@ export const categoryService = {
 
         // Try direct backend access to bypass potential Next.js proxy body limits/issues
         const baseUrl = configKeys.GEMINI_NEW_BASE_URL.replace(/\/$/, '');
-        const url = `${baseUrl}/api/upload?folder=categories`;
+        const url = `${baseUrl}/api/upload?folder=category`;
 
         console.log("🚀 V3 Category Direct Axios Upload Attempt:", url);
 

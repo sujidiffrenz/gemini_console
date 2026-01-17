@@ -3,7 +3,7 @@ import { Quote, ServiceResponse, PaginatedResult } from '../types';
 
 export const quoteService = {
     async getAll(page: number, page_size: number): Promise<PaginatedResult<Quote>> {
-        const url = `/api/quotes/?page=${page}&page_size=${page_size}`;
+        const url = `/api/quotes?page=${page}&page_size=${page_size}`;
         console.log(`Fetching quotes from: ${url}`);
         try {
             const response = await newAxiosInstance.get<any>(url);
@@ -40,14 +40,25 @@ export const quoteService = {
                 };
             }
 
-            // 3. Fallback for empty/unexpected (like {})
-            if (result && typeof result === 'object' && Object.keys(result).length === 0) {
-                console.warn('Quotes API returned an empty object, returning empty results');
-            } else if (result !== null && result !== undefined) {
-                console.error('Unexpected quotes API response format:', result);
+            // If we get here, the response format is unexpected
+            console.warn('⚠️ Unexpected quotes API response format, returning empty result');
+            return { items: [], total: 0, page, size: page_size, pages: 0 };
+        } catch (err: any) {
+            console.error('❌ Error in quoteService.getAll:', {
+                message: err.message,
+                url: err.config?.url,
+                baseURL: err.config?.baseURL,
+                response: err.response?.data,
+                status: err.response?.status
+            });
+
+            // Provide more helpful error message
+            if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+                throw new Error('Network Error: Unable to connect to the quotes API. Please check if the backend server is running.');
             }
-        } catch (error) {
-            console.error('Error fetching quotes:', error);
+
+            // Re-throw the error so it can be handled by the calling code
+            throw err;
         }
 
         return {

@@ -1,5 +1,6 @@
 import { newAxiosInstance } from './apiClient';
 import { Product, ServiceResponse, PaginatedResult } from '../types';
+import { configKeys } from '../configKeys';
 
 export const productService = {
     async getAll(page: number, page_size: number): Promise<PaginatedResult<Product>> {
@@ -65,5 +66,29 @@ export const productService = {
     async delete(id: string | number): Promise<ServiceResponse<any>> {
         const response = await newAxiosInstance.delete<ServiceResponse<any>>(`/api/products/${id}`);
         return response.data;
+    },
+
+    async create(data: Partial<Product>): Promise<ServiceResponse<Product>> {
+        // Use direct URL to ensure trailing slash is preserved and not stripped by Next.js proxy
+        const baseUrl = configKeys.GEMINI_NEW_BASE_URL.replace(/\/$/, '');
+        const url = `${baseUrl}/api/products/`;
+        const response = await newAxiosInstance.post<ServiceResponse<Product>>(url, data);
+        return response.data;
+    },
+
+    async update(id: string | number, data: Partial<Product>): Promise<ServiceResponse<Product>> {
+        const response = await newAxiosInstance.put<ServiceResponse<Product>>(`/api/products/${id}`, data);
+        return response.data;
+    },
+
+    async uploadFile(file: File): Promise<string> {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await newAxiosInstance.post<ServiceResponse<{ url: string }>>('/api/upload?folder=product', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data.result.url;
     }
 };
