@@ -1,17 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthContext } from '../../providers/AuthProvider';
 
 export default function LoginPage() {
-    const { login, loading, error } = useAuth();
+    const { login, isAuthenticated, loading } = useAuthContext();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [localLoading, setLocalLoading] = useState(false);
+    const [error, setError] = useState('');
+    const router = useRouter();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.replace('/dashboard');
+        }
+    }, [isAuthenticated, router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        await login(username, password);
+        setLocalLoading(true);
+        setError('');
+        try {
+            await login(username, password);
+            // Redirection happens in the Provider upon success
+        } catch (err: any) {
+            setError(err.message || 'Login failed. Please check your credentials.');
+        } finally {
+            setLocalLoading(false);
+        }
     };
+
+    if (isAuthenticated) {
+        return null; // Prevent flicker while redirecting
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen relative overflow-hidden bg-background">
@@ -30,7 +53,7 @@ export default function LoginPage() {
                 </p>
 
                 {error && (
-                    <div className="text-error mb-4 text-center text-sm">
+                    <div className="text-error mb-4 text-center text-sm p-sm bg-error/10 rounded border border-error/20">
                         {error}
                     </div>
                 )}
@@ -69,9 +92,9 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         className="mt-sm p-3 bg-primary text-white border-none rounded-md font-semibold cursor-pointer transition-all duration-300 hover:bg-primary-hover hover:shadow-[0_4px_12px_rgba(99,102,241,0.3)] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={loading}
+                        disabled={localLoading}
                     >
-                        {loading ? 'Signing in...' : 'Sign In'}
+                        {localLoading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
             </div>

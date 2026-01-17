@@ -8,18 +8,25 @@ export const authService = {
         formData.append('username', username);
         formData.append('password', password);
 
-        // Standardizing on newAxiosInstance
-        const response = await newAxiosInstance.post<LoginResponse>('/api/login', formData.toString(), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        });
+        try {
+            // Standardizing on newAxiosInstance
+            const response = await newAxiosInstance.post<LoginResponse>('/api/login', formData.toString(), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            });
 
-        const data = response.data;
-        if (data.access_token) {
-            this.setToken(data.access_token);
+            const data = response.data;
+            if (data.access_token) {
+                this.setToken(data.access_token);
+            }
+            return data;
+        } catch (error: any) {
+            if (error.response && error.response.status === 401) {
+                throw new Error('Incorrect username or password');
+            }
+            throw error;
         }
-        return data;
     },
 
     logout() {

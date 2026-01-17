@@ -86,6 +86,10 @@ const createNewAxiosInstance = (baseURL: string) => {
         },
         (error) => {
             if (error.response) {
+                // Silently handle 401 for login to avoid red errors in console for expected failures
+                if (error.response.status === 401 && error.config?.url?.includes('/login')) {
+                    return Promise.reject(error);
+                }
                 console.error(`❌ API Error [${error.response.status}] for ${error.config?.url}:`, error.response.data);
             } else {
                 console.error(`❌ Network/Unknown error for ${error.config?.url}:`, error);

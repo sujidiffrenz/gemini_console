@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '../../hooks/useAuth';
 
 const menuItems = [
     { label: 'Overview', path: '/dashboard', icon: '📊' },
@@ -12,11 +13,11 @@ const menuItems = [
     { label: 'Blogs', path: '/dashboard/blogs', icon: '📰' },
     { label: 'Quotes', path: '/dashboard/quotes', icon: '💬' },
     { label: 'Contacts', path: '/dashboard/contacts', icon: '📞' },
-    { label: 'SignOut', path: '/login', icon: '🚪' },
 ];
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
     const pathname = usePathname();
+    const { logout } = useAuth();
 
     return (
         <aside className={`
@@ -59,6 +60,23 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean, onClose:
                         {item.label}
                     </Link>
                 ))}
+
+                <button
+                    onClick={() => {
+                        onClose();
+                        logout();
+                    }}
+                    className={`
+                        flex items-center gap-4 p-3 rounded-lg
+                        text-text-muted transition-all duration-200 font-medium
+                        hover:bg-error/10 hover:text-error group mt-auto
+                    `}
+                >
+                    <span className="text-xl transition-transform group-hover:scale-110">
+                        🚪
+                    </span>
+                    Sign Out
+                </button>
             </nav>
         </aside>
     );
